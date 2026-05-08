@@ -1,0 +1,1422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Finance Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --surface2: #1a1e2a;
+    --border: #252a38;
+    --accent: #7effd4;
+    --accent2: #ff6b6b;
+    --accent3: #ffd166;
+    --accent4: #74b9ff;
+    --text: #e8eaf0;
+    --muted: #6b7290;
+    --green: #7effd4;
+    --red: #ff6b6b;
+    --yellow: #ffd166;
+    --blue: #74b9ff;
+    --purple: #c084fc;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 10% 20%, rgba(126,255,212,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 90% 80%, rgba(116,185,255,0.04) 0%, transparent 50%);
+  }
+
+  header {
+    padding: 2rem 2.5rem 1rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  header h1 span { color: var(--accent); }
+
+  .month-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+  }
+
+  .month-nav button {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s;
+  }
+
+  .month-nav button:hover { border-color: var(--accent); color: var(--accent); }
+
+  nav {
+    display: flex;
+    gap: 0;
+    padding: 0 2.5rem;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+
+  nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  nav button.active { color: var(--accent); border-bottom-color: var(--accent); }
+  nav button:hover:not(.active) { color: var(--text); }
+
+  main { padding: 2rem 2.5rem; max-width: 1200px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* OVERVIEW */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .kpi {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kpi::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .kpi.green::before { background: var(--green); }
+  .kpi.red::before { background: var(--red); }
+  .kpi.yellow::before { background: var(--yellow); }
+  .kpi.blue::before { background: var(--blue); }
+  .kpi.purple::before { background: var(--purple); }
+
+  .kpi-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .kpi-value.pos { color: var(--green); }
+  .kpi-value.neg { color: var(--red); }
+
+  .kpi-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (max-width: 700px) { .overview-grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* Bar chart */
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-size: 0.82rem;
+  }
+
+  .bar-label { width: 130px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 0.75rem; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar-track { flex: 1; background: var(--surface2); border-radius: 4px; height: 8px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .bar-amount { width: 80px; text-align: right; font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text); flex-shrink: 0; }
+  .bar-pct { width: 42px; text-align: right; font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); flex-shrink: 0; }
+
+  /* Upcoming bills */
+  .bill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.84rem;
+  }
+
+  .bill-item:last-child { border-bottom: none; }
+  .bill-name { font-weight: 600; }
+  .bill-due { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .bill-amount { font-family: 'DM Mono', monospace; color: var(--red); }
+
+  .badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    text-transform: uppercase;
+  }
+
+  .badge.due-soon { background: rgba(255,209,102,0.15); color: var(--yellow); }
+  .badge.overdue { background: rgba(255,107,107,0.15); color: var(--red); }
+  .badge.paid { background: rgba(126,255,212,0.12); color: var(--green); }
+
+  /* BUDGET */
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .section-header h2 { font-size: 1.1rem; font-weight: 700; }
+
+  .btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 0.5rem 1.1rem;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+  }
+
+  .btn:hover { opacity: 0.85; }
+  .btn.secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn.danger { background: rgba(255,107,107,0.15); color: var(--red); border: 1px solid rgba(255,107,107,0.3); }
+
+  .income-row {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .income-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+  .income-value { font-family: 'DM Mono', monospace; font-size: 1.3rem; color: var(--green); }
+
+  .category-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .category-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.25rem;
+  }
+
+  .cat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+  .cat-name { font-weight: 700; font-size: 0.9rem; }
+  .cat-emoji { font-size: 1.1rem; }
+  .cat-amounts { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.78rem; margin-bottom: 0.5rem; color: var(--muted); }
+  .cat-spent { color: var(--text); }
+  .cat-bar-track { background: var(--surface2); border-radius: 4px; height: 6px; overflow: hidden; margin-bottom: 0.5rem; }
+  .cat-bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .cat-remaining { font-family: 'DM Mono', monospace; font-size: 0.72rem; }
+
+  .expense-toggle {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0.4rem 0 0;
+    text-align: left;
+    width: 100%;
+    transition: color 0.2s;
+  }
+  .expense-toggle:hover { color: var(--text); }
+
+  .expense-log {
+    margin-top: 0.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+  }
+
+  .expense-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.35rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .expense-row:last-child { border-bottom: none; }
+  .expense-left { display: flex; flex-direction: column; gap: 1px; }
+  .expense-note { font-size: 0.82rem; color: var(--text); }
+  .expense-date { font-family: 'DM Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+  .expense-right { display: flex; align-items: center; gap: 0.5rem; }
+  .expense-amount { font-family: 'DM Mono', monospace; font-size: 0.82rem; color: var(--red); }
+
+  /* BILLS */
+  .bills-list { display: flex; flex-direction: column; gap: 0.75rem; }
+
+  .bill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .bill-card .bill-info { flex: 1; min-width: 150px; }
+  .bill-card .bill-title { font-weight: 700; font-size: 0.95rem; }
+  .bill-card .bill-meta { font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+  .bill-card .bill-right { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+  .bill-card .bill-price { font-family: 'DM Mono', monospace; font-size: 1rem; color: var(--red); }
+
+  /* SAVINGS */
+  .goals-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+
+  .goal-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .goal-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .goal-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+  .goal-name { font-weight: 700; font-size: 1rem; }
+  .goal-emoji { font-size: 1.4rem; }
+  .goal-deadline { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+
+  .goal-amounts { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.82rem; margin-bottom: 0.6rem; }
+  .goal-current { font-size: 1.1rem; font-weight: 500; }
+  .goal-target { color: var(--muted); align-self: flex-end; }
+
+  .goal-bar-track { background: var(--surface2); border-radius: 6px; height: 10px; overflow: hidden; margin-bottom: 0.75rem; }
+  .goal-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s; }
+
+  .goal-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; }
+  .goal-pct { font-family: 'DM Mono', monospace; font-weight: 500; }
+  .goal-status { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+
+  .goal-actions { display: flex; gap: 0.5rem; margin-top: 0.75rem; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 100;
+    display: none;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem;
+    width: 90%;
+    max-width: 460px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
+
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.4rem; }
+
+  .field input, .field select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 0.6rem 0.85rem;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .field select option { background: var(--surface2); }
+
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .colour-dots { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+  .colour-dot {
+    width: 26px; height: 26px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: border-color 0.2s;
+  }
+  .colour-dot.selected { border-color: white; }
+
+  .empty-state {
+    text-align: center; padding: 3rem 1rem; color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+  /* Toggle for paid/unpaid */
+  .toggle-paid {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: all 0.2s;
+  }
+
+  .toggle-paid.is-paid { background: rgba(126,255,212,0.1); border-color: var(--green); color: var(--green); }
+
+  .delete-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0.2rem 0.4rem; border-radius: 4px; transition: color 0.2s;
+  }
+
+  .delete-btn:hover { color: var(--red); }
+
+  /* POTS */
+  .pots-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+
+  .pot-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pot-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .pot-top { display: flex; align-items: center; justify-content: space-between; }
+  .pot-name-wrap { display: flex; align-items: center; gap: 0.5rem; }
+  .pot-emoji { font-size: 1.2rem; }
+  .pot-name { font-weight: 700; font-size: 0.95rem; }
+  .pot-balance { font-family: 'DM Mono', monospace; font-size: 1.4rem; font-weight: 500; }
+  .pot-note { font-size: 0.75rem; color: var(--muted); font-family: 'DM Mono', monospace; }
+  .pot-actions { display: flex; gap: 0.5rem; margin-top: 0.25rem; }
+
+  .contribute-btn {
+    background: rgba(126,255,212,0.1);
+    border: 1px solid rgba(126,255,212,0.25);
+    color: var(--green);
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .contribute-btn:hover { background: rgba(126,255,212,0.2); }
+
+  /* Net bar */
+  .net-bar-wrap { margin-bottom: 1.5rem; }
+  .net-bar-labels { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 0.72rem; color: var(--muted); margin-bottom: 0.4rem; }
+  .net-bar-track { background: var(--surface2); border-radius: 6px; height: 12px; overflow: hidden; position: relative; }
+  .net-bar-income { height: 100%; background: var(--green); border-radius: 6px; position: absolute; top: 0; left: 0; }
+  .net-bar-spent { height: 100%; background: var(--red); border-radius: 6px; position: absolute; top: 0; left: 0; opacity: 0.8; }
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Finance <span>Hub</span></h1>
+  <div class="month-nav">
+    <button id="prevMonth">‹</button>
+    <span id="monthLabel">—</span>
+    <button id="nextMonth">›</button>
+  </div>
+</header>
+
+<nav>
+  <button class="active" data-tab="overview">Overview</button>
+  <button data-tab="budget">Budget</button>
+  <button data-tab="bills">Bills</button>
+  <button data-tab="savings">Savings</button>
+</nav>
+
+<main>
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="tab-overview">
+    <div class="kpi-grid" id="kpiGrid"></div>
+    <div class="net-bar-wrap">
+      <div class="net-bar-labels">
+        <span>Income</span>
+        <span id="netBarLabel">—</span>
+      </div>
+      <div class="net-bar-track">
+        <div class="net-bar-income" id="netBarIncome"></div>
+        <div class="net-bar-spent" id="netBarSpent"></div>
+      </div>
+    </div>
+    <div class="overview-grid">
+      <div class="card">
+        <div class="card-title">Spending by Category</div>
+        <div id="categoryBars"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Upcoming Bills</div>
+        <div id="upcomingBills"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BUDGET -->
+  <div class="section" id="tab-budget">
+    <div class="income-row">
+      <div>
+        <div class="income-label">Monthly Income</div>
+        <div class="income-value" id="incomeDisplay">£0.00</div>
+        <div id="carryoverDisplay" style="font-family:'DM Mono',monospace;font-size:0.75rem;margin-top:4px;display:none;">
+          <span style="color:var(--muted)">+ </span><span id="carryoverAmt" style="color:var(--accent)"></span><span style="color:var(--muted)"> carried over</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button class="btn secondary" id="editIncomeBtn">Edit Income</button>
+        <button class="btn secondary" id="carryoverBtn">↩ Carry Over</button>
+        <button class="btn" id="addCategoryBtn">+ Category</button>
+      </div>
+    </div>
+    <div class="category-grid" id="categoryGrid"></div>
+  </div>
+
+  <!-- BILLS -->
+  <div class="section" id="tab-bills">
+    <div class="section-header">
+      <h2>Recurring Bills</h2>
+      <button class="btn" id="addBillBtn">+ Bill</button>
+    </div>
+    <div class="bills-list" id="billsList"></div>
+  </div>
+
+  <!-- SAVINGS -->
+  <div class="section" id="tab-savings">
+    <div class="section-header">
+      <h2>Savings Goals</h2>
+      <button class="btn" id="addGoalBtn">+ Goal</button>
+    </div>
+    <div class="goals-grid" id="goalsGrid"></div>
+
+    <div class="section-header" style="margin-top:2.5rem;">
+      <div>
+        <h2>Pots &amp; Accounts</h2>
+        <p style="font-size:0.75rem;color:var(--muted);margin-top:3px;">Savings you already have — no target needed</p>
+      </div>
+      <button class="btn secondary" id="addPotBtn">+ Pot</button>
+    </div>
+    <div class="pots-grid" id="potsGrid"></div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 id="modalTitle">Add Item</h3>
+    <div id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn secondary" id="modalCancel">Cancel</button>
+      <button class="btn" id="modalSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+const COLOURS = ['#7effd4','#ff6b6b','#ffd166','#74b9ff','#c084fc','#fb923c','#f472b6','#34d399'];
+
+function loadData() {
+  try {
+    return JSON.parse(localStorage.getItem('financeHub')) || defaultData();
+  } catch { return defaultData(); }
+}
+
+function defaultData() {
+  return {
+    income: {},        // { "2025-05": 2800 }
+    categories: [
+      { id: uid(), name: 'Rent / Mortgage', emoji: '🏠', colour: '#74b9ff', budgets: {} },
+      { id: uid(), name: 'Groceries', emoji: '🛒', colour: '#7effd4', budgets: {} },
+      { id: uid(), name: 'Utilities', emoji: '⚡', colour: '#ffd166', budgets: {} },
+      { id: uid(), name: 'Transport', emoji: '🚗', colour: '#c084fc', budgets: {} },
+      { id: uid(), name: 'Entertainment', emoji: '🎮', colour: '#fb923c', budgets: {} },
+    ],
+    expenses: [],      // { id, categoryId, amount, note, date }
+    bills: [],         // { id, name, amount, dayOfMonth, colour, paid: { "2025-05": bool } }
+    goals: [],         // { id, name, emoji, colour, target, saved, deadline }
+    pots: [],          // { id, name, emoji, colour, balance, note }
+  };
+}
+
+function uid() { return Math.random().toString(36).slice(2, 9); }
+function saveData() { localStorage.setItem('financeHub', JSON.stringify(state)); }
+
+let state = loadData();
+
+// ─── CURRENT MONTH ────────────────────────────────────────────────────────────
+let currentDate = new Date();
+let currentYear = currentDate.getFullYear();
+let currentMonth = currentDate.getMonth(); // 0-indexed
+
+function monthKey() { return `${currentYear}-${String(currentMonth + 1).padStart(2,'0')}`; }
+function monthLabel() {
+  return new Date(currentYear, currentMonth, 1).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+}
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+document.getElementById('prevMonth').addEventListener('click', () => {
+  currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderAll();
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+  renderAll();
+});
+
+document.querySelectorAll('nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function fmt(n) { return '£' + Number(n || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+function getIncome() { return state.income[monthKey()] || 0; }
+
+function prevMonthKey() {
+  const m = currentMonth === 0 ? 11 : currentMonth - 1;
+  const y = currentMonth === 0 ? currentYear - 1 : currentYear;
+  return `${y}-${String(m + 1).padStart(2,'0')}`;
+}
+
+function getPrevMonthRemaining() {
+  const pk = prevMonthKey();
+  const prevIncome = (state.income[pk] || 0) + (state.carryover?.[pk] || 0);
+  const prevSpent = state.expenses
+    .filter(e => e.date && e.date.startsWith(pk))
+    .reduce((s, e) => s + (e.amount || 0), 0);
+  const prevBills = state.bills.reduce((s, b) => s + (b.amount || 0), 0);
+  return Math.max(0, prevIncome - prevSpent - prevBills);
+}
+
+function getCarryover() { return state.carryover?.[monthKey()] || 0; }
+
+function getTotalIncome() { return getIncome() + getCarryover(); }
+
+function getCategorySpent(catId) {
+  return state.expenses
+    .filter(e => e.categoryId === catId && e.date && e.date.startsWith(monthKey()))
+    .reduce((s, e) => s + (e.amount || 0), 0);
+}
+
+function getCategoryBudget(cat) { return cat.budgets[monthKey()] || cat.budgets['default'] || 0; }
+
+function getTotalSpent() {
+  return state.categories.reduce((s, c) => s + getCategorySpent(c.id), 0);
+}
+
+function getTotalBills() {
+  return state.bills.reduce((s, b) => s + (b.amount || 0), 0);
+}
+
+function getTotalSaved() {
+  return state.goals.reduce((s, g) => s + (g.saved || 0), 0);
+}
+
+function getTotalPots() {
+  return (state.pots || []).reduce((s, p) => s + (p.balance || 0), 0);
+}
+
+function daysUntil(day) {
+  const today = new Date();
+  let d = new Date(currentYear, currentMonth, day);
+  if (d < today) d.setMonth(d.getMonth() + 1);
+  return Math.round((d - today) / 86400000);
+}
+
+// ─── RENDER ALL ───────────────────────────────────────────────────────────────
+function renderAll() {
+  document.getElementById('monthLabel').textContent = monthLabel();
+  renderOverview();
+  renderBudget();
+  renderBills();
+  renderSavings();
+  renderPots();
+}
+
+// ─── OVERVIEW ─────────────────────────────────────────────────────────────────
+function renderOverview() {
+  const income = getTotalIncome();
+  const baseIncome = getIncome();
+  const carryover = getCarryover();
+  const spent = getTotalSpent();
+  const bills = getTotalBills();
+  const saved = getTotalSaved();
+  const pots = getTotalPots();
+  const totalSavings = saved + pots;
+  const remaining = income - spent - bills;
+
+  const kpiGrid = document.getElementById('kpiGrid');
+  kpiGrid.innerHTML = `
+    <div class="kpi green">
+      <div class="kpi-label">Income</div>
+      <div class="kpi-value pos">${fmt(baseIncome)}</div>
+      <div class="kpi-sub">This month</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Spent</div>
+      <div class="kpi-value neg">${fmt(spent)}</div>
+      <div class="kpi-sub">Across ${state.categories.length} categories</div>
+    </div>
+    <div class="kpi yellow">
+      <div class="kpi-label">Bills</div>
+      <div class="kpi-value" style="color:var(--yellow)">${fmt(bills)}</div>
+      <div class="kpi-sub">${state.bills.length} recurring</div>
+    </div>
+    <div class="kpi ${remaining >= 0 ? 'green' : 'red'}">
+      <div class="kpi-label">Remaining</div>
+      <div class="kpi-value ${remaining >= 0 ? 'pos' : 'neg'}">${fmt(remaining)}</div>
+      <div class="kpi-sub">${carryover > 0 ? 'Incl. ' + fmt(carryover) + ' carry over' : 'After spending & bills'}</div>
+    </div>
+    <div class="kpi purple">
+      <div class="kpi-label">Total Savings</div>
+      <div class="kpi-value" style="color:var(--purple)">${fmt(totalSavings)}</div>
+      <div class="kpi-sub">${state.goals.length} goals · ${(state.pots||[]).length} pots</div>
+    </div>
+  `;
+
+  // Net bar
+  const total = income || 1;
+  const spentPct = Math.min((spent + bills) / total * 100, 100);
+  document.getElementById('netBarIncome').style.width = '100%';
+  document.getElementById('netBarSpent').style.width = spentPct + '%';
+  document.getElementById('netBarLabel').textContent =
+    remaining >= 0 ? `${fmt(remaining)} remaining` : `${fmt(Math.abs(remaining))} over budget`;
+
+  // Category bars
+  const catBars = document.getElementById('categoryBars');
+  const maxSpent = Math.max(...state.categories.map(c => getCategorySpent(c.id)), 1);
+  const incomeForPct = getTotalIncome() || 1;
+  if (state.categories.length === 0) {
+    catBars.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div>No categories yet</div>';
+  } else {
+    catBars.innerHTML = state.categories.map(c => {
+      const s = getCategorySpent(c.id);
+      const pct = (s / maxSpent * 100) || 0;
+      const incomePct = getIncome() > 0 ? (s / getIncome() * 100) : 0;
+      const pctStr = incomePct > 0 ? incomePct.toFixed(1) + '%' : '—';
+      return `<div class="bar-row">
+        <span class="bar-label" title="${c.name}">${c.emoji} ${c.name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${c.colour}"></div></div>
+        <span class="bar-amount">${fmt(s)}</span>
+        <span class="bar-pct">${pctStr}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Upcoming bills
+  const upcomingEl = document.getElementById('upcomingBills');
+  if (state.bills.length === 0) {
+    upcomingEl.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No bills added</div>';
+  } else {
+    const sorted = [...state.bills].sort((a, b) => a.dayOfMonth - b.dayOfMonth);
+    upcomingEl.innerHTML = sorted.slice(0, 6).map(b => {
+      const isPaid = isBillPaid(b);
+      const days = daysUntil(b.dayOfMonth);
+      let badge = '';
+      if (isPaid) badge = '<span class="badge paid">Paid</span>';
+      else if (days <= 0) badge = '<span class="badge overdue">Overdue</span>';
+      else if (days <= 5) badge = '<span class="badge due-soon">Due Soon</span>';
+      return `<div class="bill-item">
+        <div>
+          <div class="bill-name">${b.name}</div>
+          <div class="bill-due">Due ${b.dayOfMonth}${ordinal(b.dayOfMonth)} each month</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          ${badge}
+          <span class="bill-amount">${fmt(b.amount)}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+function ordinal(n) {
+  const s = ['th','st','nd','rd'], v = n % 100;
+  return s[(v - 20) % 10] || s[v] || s[0];
+}
+
+// ─── BUDGET ───────────────────────────────────────────────────────────────────
+function renderBudget() {
+  const carryover = getCarryover();
+  document.getElementById('incomeDisplay').textContent = fmt(getTotalIncome());
+  const carryoverDisplay = document.getElementById('carryoverDisplay');
+  if (carryover > 0) {
+    document.getElementById('carryoverAmt').textContent = fmt(carryover);
+    carryoverDisplay.style.display = 'block';
+  } else {
+    carryoverDisplay.style.display = 'none';
+  }
+
+  const grid = document.getElementById('categoryGrid');
+  if (state.categories.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">📂</div>No categories yet. Add one!</div>';
+    return;
+  }
+
+  grid.innerHTML = state.categories.map(cat => {
+    const spent = getCategorySpent(cat.id);
+    const budget = getCategoryBudget(cat);
+    const pct = budget > 0 ? Math.min(spent / budget * 100, 100) : 0;
+    const remaining = budget - spent;
+    const over = remaining < 0;
+    const expenses = state.expenses
+      .filter(e => e.categoryId === cat.id && e.date && e.date.startsWith(monthKey()))
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+    const expenseRows = expenses.length === 0
+      ? `<div style="font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--muted);padding:0.5rem 0;">No entries this month</div>`
+      : expenses.map(e => `
+        <div class="expense-row">
+          <div class="expense-left">
+            <span class="expense-note">${e.note || '—'}</span>
+            <span class="expense-date">${new Date(e.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+          </div>
+          <div class="expense-right">
+            <span class="expense-amount">${fmt(e.amount)}</span>
+            <button class="delete-btn" style="font-size:0.8rem;" onclick="deleteExpense('${e.id}')">✕</button>
+          </div>
+        </div>`).join('');
+
+    return `<div class="category-card">
+      <div class="cat-header">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <span class="cat-emoji">${cat.emoji}</span>
+          <span class="cat-name">${cat.name}</span>
+        </div>
+        <div style="display:flex;gap:0.4rem;">
+          <button class="btn secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;" onclick="openAddExpense('${cat.id}')">+ Spend</button>
+          <button class="btn secondary" style="padding:0.25rem 0.5rem;font-size:0.7rem;" onclick="openEditCategory('${cat.id}')">Edit</button>
+          <button class="delete-btn" onclick="deleteCategory('${cat.id}')">✕</button>
+        </div>
+      </div>
+      <div class="cat-amounts">
+        <span class="cat-spent">${fmt(spent)} spent</span>
+        <span>${budget > 0 ? 'Budget: ' + fmt(budget) : 'No budget set'}</span>
+      </div>
+      <div class="cat-bar-track">
+        <div class="cat-bar-fill" style="width:${pct}%;background:${over ? 'var(--red)' : cat.colour}"></div>
+      </div>
+      <div class="cat-remaining" style="color:${over ? 'var(--red)' : 'var(--muted)'}">
+        ${budget > 0 ? (over ? `${fmt(Math.abs(remaining))} over budget` : `${fmt(remaining)} left`) : ''}
+      </div>
+      <button class="expense-toggle" onclick="toggleExpenses('${cat.id}')">
+        <span id="toggle-icon-${cat.id}">▸</span> ${expenses.length} item${expenses.length !== 1 ? 's' : ''} this month
+      </button>
+      <div class="expense-log" id="expense-log-${cat.id}" style="display:none;">
+        ${expenseRows}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleExpenses(catId) {
+  const log = document.getElementById('expense-log-' + catId);
+  const icon = document.getElementById('toggle-icon-' + catId);
+  const isOpen = log.style.display !== 'none';
+  log.style.display = isOpen ? 'none' : 'block';
+  icon.textContent = isOpen ? '▸' : '▾';
+}
+
+function deleteExpense(id) {
+  state.expenses = state.expenses.filter(e => e.id !== id);
+  saveData(); renderAll();
+}
+
+// ─── BILLS ────────────────────────────────────────────────────────────────────
+
+// Returns whether a bill is paid for the current month.
+// Manual override always wins. If no manual override, auto-marks as paid
+// when today's date is on or past the bill's due day (current month only).
+function isBillPaid(bill) {
+  const mk = monthKey();
+  const manualOverrides = bill.manualOverride || {};
+
+  // If the user has manually set a state this month, use that
+  if (mk in manualOverrides) return manualOverrides[mk];
+
+  // Only auto-mark for the current real month, not past/future navigation
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+  if (isCurrentMonth && today.getDate() >= bill.dayOfMonth) return true;
+
+  return false;
+}
+
+function renderBills() {
+  const list = document.getElementById('billsList');
+  if (state.bills.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>No bills yet. Add your first one!</div>';
+    return;
+  }
+
+  const sorted = [...state.bills].sort((a, b) => a.dayOfMonth - b.dayOfMonth);
+  list.innerHTML = sorted.map(b => {
+    const isPaid = isBillPaid(b);
+    const isManual = monthKey() in (b.manualOverride || {});
+    const isAutoMarked = isPaid && !isManual;
+    const days = daysUntil(b.dayOfMonth);
+    let statusBadge = '';
+    if (isPaid && isAutoMarked) statusBadge = '<span class="badge paid">✓ Auto-paid</span>';
+    else if (isPaid) statusBadge = '<span class="badge paid">✓ Paid</span>';
+    else if (days <= 0) statusBadge = '<span class="badge overdue">Overdue</span>';
+    else if (days <= 5) statusBadge = `<span class="badge due-soon">Due in ${days}d</span>`;
+    else statusBadge = `<span style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--muted)">${days}d away</span>`;
+
+    return `<div class="bill-card">
+      <div style="width:10px;height:10px;border-radius:50%;background:${b.colour || 'var(--accent)'};flex-shrink:0;margin-top:3px;"></div>
+      <div class="bill-info">
+        <div class="bill-title">${b.name}</div>
+        <div class="bill-meta">Due ${b.dayOfMonth}${ordinal(b.dayOfMonth)} each month</div>
+      </div>
+      <div class="bill-right">
+        ${statusBadge}
+        <span class="bill-price">${fmt(b.amount)}</span>
+        <button class="toggle-paid ${isPaid ? 'is-paid' : ''}" onclick="togglePaid('${b.id}')">
+          ${isPaid ? 'Mark Unpaid' : 'Mark Paid'}
+        </button>
+        <button class="delete-btn" onclick="deleteBill('${b.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function togglePaid(id) {
+  const bill = state.bills.find(b => b.id === id);
+  if (!bill) return;
+  if (!bill.manualOverride) bill.manualOverride = {};
+  const mk = monthKey();
+  // If currently auto-marked, manual toggle should set it to unpaid (false)
+  // If manually set, flip it; if being set back to auto state, clear the override
+  const currentPaid = isBillPaid(bill);
+  const wouldBeAuto = (() => {
+    const today = new Date();
+    const isCurrentMonth = today.getFullYear() === currentYear && today.getMonth() === currentMonth;
+    return isCurrentMonth && today.getDate() >= bill.dayOfMonth;
+  })();
+  const newState = !currentPaid;
+  // If the new state matches what auto would give, clear override so auto takes over
+  if (newState === wouldBeAuto) {
+    delete bill.manualOverride[mk];
+  } else {
+    bill.manualOverride[mk] = newState;
+  }
+  saveData();
+  renderBills();
+  renderOverview();
+}
+
+function deleteBill(id) {
+  state.bills = state.bills.filter(b => b.id !== id);
+  saveData(); renderAll();
+}
+
+// ─── SAVINGS ──────────────────────────────────────────────────────────────────
+function renderSavings() {
+  const grid = document.getElementById('goalsGrid');
+  if (state.goals.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🎯</div>No goals yet. Set your first one!</div>';
+    return;
+  }
+
+  grid.innerHTML = state.goals.map(g => {
+    const pct = g.target > 0 ? Math.min(g.saved / g.target * 100, 100) : 0;
+    const remaining = g.target - g.saved;
+    const done = pct >= 100;
+
+    let deadlineStr = '';
+    if (g.deadline) {
+      const dl = new Date(g.deadline);
+      const today = new Date();
+      const months = (dl.getFullYear() - today.getFullYear()) * 12 + dl.getMonth() - today.getMonth();
+      deadlineStr = dl.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
+      if (!done && months > 0 && remaining > 0) {
+        const monthly = remaining / months;
+        deadlineStr += ` · ${fmt(monthly)}/mo needed`;
+      }
+    }
+
+    return `<div class="goal-card" style="border-color:${g.colour}22">
+      <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:${g.colour};opacity:0.6;border-radius:0 0 12px 12px;"></div>
+      <div class="goal-top">
+        <div>
+          <div class="goal-name">${g.name}</div>
+          ${deadlineStr ? `<div class="goal-deadline">🗓 ${deadlineStr}</div>` : ''}
+        </div>
+        <span style="font-size:1.6rem;">${g.emoji}</span>
+      </div>
+      <div class="goal-amounts">
+        <span class="goal-current" style="color:${g.colour}">${fmt(g.saved)}</span>
+        <span class="goal-target">of ${fmt(g.target)}</span>
+      </div>
+      <div class="goal-bar-track">
+        <div class="goal-bar-fill" style="width:${pct}%;background:${g.colour}"></div>
+      </div>
+      <div class="goal-footer">
+        <span class="goal-pct" style="color:${g.colour}">${pct.toFixed(1)}%</span>
+        <span class="goal-status" style="color:${done ? 'var(--green)' : 'var(--muted)'}">
+          ${done ? '🎉 Complete!' : fmt(remaining) + ' to go'}
+        </span>
+      </div>
+      <div class="goal-actions">
+        <button class="contribute-btn" onclick="openContribute('${g.id}')">+ Add funds</button>
+        <button class="btn secondary" style="padding:0.3rem 0.7rem;font-size:0.72rem;" onclick="openEditGoal('${g.id}')">Edit</button>
+        <button class="delete-btn" onclick="deleteGoal('${g.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteGoal(id) {
+  state.goals = state.goals.filter(g => g.id !== id);
+  saveData(); renderAll();
+}
+
+function deleteCategory(id) {
+  state.categories = state.categories.filter(c => c.id !== id);
+  state.expenses = state.expenses.filter(e => e.categoryId !== id);
+  saveData(); renderAll();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+let modalCallback = null;
+
+function openModal(title, bodyHtml, onSave) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').innerHTML = bodyHtml;
+  document.getElementById('modalOverlay').classList.add('open');
+  modalCallback = onSave;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  modalCallback = null;
+}
+
+document.getElementById('modalCancel').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('modalSave').addEventListener('click', () => { if (modalCallback) modalCallback(); });
+
+// ─── INCOME ───────────────────────────────────────────────────────────────────
+document.getElementById('editIncomeBtn').addEventListener('click', () => {
+  openModal('Monthly Income', `
+    <div class="field">
+      <label>Income for ${monthLabel()}</label>
+      <input type="number" id="f_income" value="${getIncome()}" min="0" step="0.01" placeholder="0.00">
+    </div>
+  `, () => {
+    const v = parseFloat(document.getElementById('f_income').value) || 0;
+    state.income[monthKey()] = v;
+    saveData(); renderAll(); closeModal();
+  });
+});
+
+document.getElementById('carryoverBtn').addEventListener('click', () => {
+  const prevRemaining = getPrevMonthRemaining();
+  const existing = getCarryover();
+  const prevKey = prevMonthKey();
+  const prevDate = new Date(parseInt(prevKey.split('-')[0]), parseInt(prevKey.split('-')[1]) - 1, 1)
+    .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+
+  openModal('Carry Over from Last Month', `
+    <div style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--muted);margin-bottom:1rem;line-height:1.6;">
+      <div>Previous month: <span style="color:var(--text)">${prevDate}</span></div>
+      <div>Calculated remaining: <span style="color:var(--green)">${fmt(prevRemaining)}</span></div>
+    </div>
+    <div class="field">
+      <label>Amount to carry over (£)</label>
+      <input type="number" id="f_carry" value="${existing || prevRemaining}" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <p style="font-size:0.72rem;color:var(--muted);margin-top:0.5rem;">This will appear as extra income for ${monthLabel()}. You can adjust the amount if needed.</p>
+  `, () => {
+    const v = parseFloat(document.getElementById('f_carry').value) || 0;
+    if (!state.carryover) state.carryover = {};
+    state.carryover[monthKey()] = v;
+    saveData(); renderAll(); closeModal();
+  });
+});
+
+// ─── ADD CATEGORY ─────────────────────────────────────────────────────────────
+document.getElementById('addCategoryBtn').addEventListener('click', () => openCategoryModal());
+
+function openCategoryModal(existing) {
+  const isEdit = !!existing;
+  openModal(isEdit ? 'Edit Category' : 'New Category', `
+    <div class="field"><label>Name</label><input type="text" id="f_cname" value="${existing?.name || ''}" placeholder="e.g. Groceries"></div>
+    <div class="field-row">
+      <div class="field"><label>Emoji</label><input type="text" id="f_cemoji" value="${existing?.emoji || '📦'}" maxlength="2"></div>
+      <div class="field"><label>Budget (${monthLabel()})</label><input type="number" id="f_cbudget" value="${existing ? getCategoryBudget(existing) : ''}" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="colour-dots">${COLOURS.map(c =>
+        `<div class="colour-dot ${(existing?.colour || COLOURS[0]) === c ? 'selected' : ''}" style="background:${c}" data-c="${c}" onclick="selectDot(this)"></div>`
+      ).join('')}</div>
+    </div>
+  `, () => {
+    const name = document.getElementById('f_cname').value.trim();
+    if (!name) return;
+    const emoji = document.getElementById('f_cemoji').value || '📦';
+    const budget = parseFloat(document.getElementById('f_cbudget').value) || 0;
+    const colour = document.querySelector('.colour-dot.selected')?.dataset.c || COLOURS[0];
+    if (isEdit) {
+      existing.name = name; existing.emoji = emoji; existing.colour = colour;
+      existing.budgets[monthKey()] = budget;
+    } else {
+      const budgets = {}; budgets[monthKey()] = budget;
+      state.categories.push({ id: uid(), name, emoji, colour, budgets });
+    }
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+function openEditCategory(id) {
+  const cat = state.categories.find(c => c.id === id);
+  if (cat) openCategoryModal(cat);
+}
+
+function selectDot(el) {
+  document.querySelectorAll('.colour-dot').forEach(d => d.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// ─── ADD EXPENSE ──────────────────────────────────────────────────────────────
+function openAddExpense(catId) {
+  openModal('Log Spending', `
+    <div class="field"><label>Amount</label><input type="number" id="f_eamt" min="0" step="0.01" placeholder="0.00"></div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="f_enote" placeholder="e.g. Tesco shop"></div>
+    <div class="field"><label>Date</label><input type="date" id="f_edate" value="${monthKey()}-01"></div>
+  `, () => {
+    const amount = parseFloat(document.getElementById('f_eamt').value) || 0;
+    const note = document.getElementById('f_enote').value.trim();
+    const date = document.getElementById('f_edate').value || `${monthKey()}-01`;
+    if (!amount) return;
+    state.expenses.push({ id: uid(), categoryId: catId, amount, note, date });
+    saveData(); renderAll(); closeModal();
+  });
+  // Set date input to current month
+  setTimeout(() => {
+    const today = new Date();
+    const y = currentYear, m = currentMonth;
+    const todayInMonth = (today.getFullYear() === y && today.getMonth() === m) ? today : new Date(y, m, 1);
+    const d = String(todayInMonth.getDate()).padStart(2,'0');
+    document.getElementById('f_edate').value = `${y}-${String(m+1).padStart(2,'0')}-${d}`;
+  }, 50);
+}
+
+// ─── ADD BILL ─────────────────────────────────────────────────────────────────
+document.getElementById('addBillBtn').addEventListener('click', () => openBillModal());
+
+function openBillModal(existing) {
+  const isEdit = !!existing;
+  openModal(isEdit ? 'Edit Bill' : 'New Bill', `
+    <div class="field"><label>Bill Name</label><input type="text" id="f_bname" value="${existing?.name || ''}" placeholder="e.g. Netflix"></div>
+    <div class="field-row">
+      <div class="field"><label>Amount (£)</label><input type="number" id="f_bamt" value="${existing?.amount || ''}" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Day of Month</label><input type="number" id="f_bday" value="${existing?.dayOfMonth || ''}" min="1" max="31" placeholder="e.g. 15"></div>
+    </div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="colour-dots">${COLOURS.map(c =>
+        `<div class="colour-dot ${(existing?.colour || COLOURS[1]) === c ? 'selected' : ''}" style="background:${c}" data-c="${c}" onclick="selectDot(this)"></div>`
+      ).join('')}</div>
+    </div>
+  `, () => {
+    const name = document.getElementById('f_bname').value.trim();
+    const amount = parseFloat(document.getElementById('f_bamt').value) || 0;
+    const dayOfMonth = parseInt(document.getElementById('f_bday').value) || 1;
+    const colour = document.querySelector('.colour-dot.selected')?.dataset.c || COLOURS[1];
+    if (!name || !amount) return;
+    if (isEdit) {
+      existing.name = name; existing.amount = amount; existing.dayOfMonth = dayOfMonth; existing.colour = colour;
+    } else {
+      state.bills.push({ id: uid(), name, amount, dayOfMonth, colour, paid: {} });
+    }
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+// ─── POTS ─────────────────────────────────────────────────────────────────────
+function renderPots() {
+  if (!state.pots) state.pots = [];
+  const grid = document.getElementById('potsGrid');
+  const total = getTotalPots();
+
+  if (state.pots.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🏦</div>No pots yet. Add a savings account or pot!</div>';
+    return;
+  }
+
+  grid.innerHTML = state.pots.map(p => `
+    <div class="pot-card" style="border-color:${p.colour}33">
+      <div style="position:absolute;top:0;left:0;right:0;height:2px;background:${p.colour}"></div>
+      <div class="pot-top">
+        <div class="pot-name-wrap">
+          <span class="pot-emoji">${p.emoji}</span>
+          <span class="pot-name">${p.name}</span>
+        </div>
+        <button class="delete-btn" onclick="deletePot('${p.id}')">✕</button>
+      </div>
+      <div class="pot-balance" style="color:${p.colour}">${fmt(p.balance)}</div>
+      ${p.note ? `<div class="pot-note">${p.note}</div>` : ''}
+      <div class="pot-actions">
+        <button class="contribute-btn" onclick="openAdjustPot('${p.id}', 'add')">+ Add</button>
+        <button class="contribute-btn" style="background:rgba(255,107,107,0.1);border-color:rgba(255,107,107,0.25);color:var(--red)" onclick="openAdjustPot('${p.id}', 'remove')">− Withdraw</button>
+        <button class="btn secondary" style="padding:0.3rem 0.7rem;font-size:0.72rem;" onclick="openPotModal(state.pots.find(x=>x.id==='${p.id}'))">Edit</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('addPotBtn').addEventListener('click', () => openPotModal());
+
+function openPotModal(existing) {
+  const isEdit = !!existing;
+  openModal(isEdit ? 'Edit Pot' : 'New Pot / Account', `
+    <div class="field"><label>Name</label><input type="text" id="f_pname" value="${existing?.name || ''}" placeholder="e.g. Monzo Savings, ISA"></div>
+    <div class="field-row">
+      <div class="field"><label>Emoji</label><input type="text" id="f_pemoji" value="${existing?.emoji || '🏦'}" maxlength="2"></div>
+      <div class="field"><label>Current Balance (£)</label><input type="number" id="f_pbalance" value="${existing?.balance || ''}" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="field"><label>Note (optional)</label><input type="text" id="f_pnote" value="${existing?.note || ''}" placeholder="e.g. Easy access ISA"></div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="colour-dots">${COLOURS.map(c =>
+        `<div class="colour-dot ${(existing?.colour || COLOURS[3]) === c ? 'selected' : ''}" style="background:${c}" data-c="${c}" onclick="selectDot(this)"></div>`
+      ).join('')}</div>
+    </div>
+  `, () => {
+    const name = document.getElementById('f_pname').value.trim();
+    if (!name) return;
+    const emoji = document.getElementById('f_pemoji').value || '🏦';
+    const balance = parseFloat(document.getElementById('f_pbalance').value) || 0;
+    const note = document.getElementById('f_pnote').value.trim();
+    const colour = document.querySelector('.colour-dot.selected')?.dataset.c || COLOURS[3];
+    if (isEdit) {
+      Object.assign(existing, { name, emoji, balance, note, colour });
+    } else {
+      state.pots.push({ id: uid(), name, emoji, balance, note, colour });
+    }
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+function openAdjustPot(id, direction) {
+  const p = state.pots.find(p => p.id === id);
+  if (!p) return;
+  const isAdd = direction === 'add';
+  openModal(isAdd ? `Add to "${p.name}"` : `Withdraw from "${p.name}"`, `
+    <div class="field">
+      <label>Amount (£)</label>
+      <input type="number" id="f_padj" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">
+      Current balance: ${fmt(p.balance)}
+    </div>
+  `, () => {
+    const amt = parseFloat(document.getElementById('f_padj').value) || 0;
+    if (!amt) return;
+    p.balance = Math.max(0, p.balance + (isAdd ? amt : -amt));
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+function deletePot(id) {
+  state.pots = state.pots.filter(p => p.id !== id);
+  saveData(); renderAll();
+}
+
+// ─── ADD GOAL ─────────────────────────────────────────────────────────────────
+document.getElementById('addGoalBtn').addEventListener('click', () => openGoalModal());
+
+function openGoalModal(existing) {
+  const isEdit = !!existing;
+  openModal(isEdit ? 'Edit Goal' : 'New Savings Goal', `
+    <div class="field"><label>Goal Name</label><input type="text" id="f_gname" value="${existing?.name || ''}" placeholder="e.g. Holiday Fund"></div>
+    <div class="field-row">
+      <div class="field"><label>Emoji</label><input type="text" id="f_gemoji" value="${existing?.emoji || '🎯'}" maxlength="2"></div>
+      <div class="field"><label>Target (£)</label><input type="number" id="f_gtarget" value="${existing?.target || ''}" min="0" step="0.01" placeholder="0.00"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Already Saved (£)</label><input type="number" id="f_gsaved" value="${existing?.saved || ''}" min="0" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Target Date</label><input type="date" id="f_gdeadline" value="${existing?.deadline || ''}"></div>
+    </div>
+    <div class="field">
+      <label>Colour</label>
+      <div class="colour-dots">${COLOURS.map(c =>
+        `<div class="colour-dot ${(existing?.colour || COLOURS[4]) === c ? 'selected' : ''}" style="background:${c}" data-c="${c}" onclick="selectDot(this)"></div>`
+      ).join('')}</div>
+    </div>
+  `, () => {
+    const name = document.getElementById('f_gname').value.trim();
+    const emoji = document.getElementById('f_gemoji').value || '🎯';
+    const target = parseFloat(document.getElementById('f_gtarget').value) || 0;
+    const saved = parseFloat(document.getElementById('f_gsaved').value) || 0;
+    const deadline = document.getElementById('f_gdeadline').value || '';
+    const colour = document.querySelector('.colour-dot.selected')?.dataset.c || COLOURS[4];
+    if (!name || !target) return;
+    if (isEdit) {
+      Object.assign(existing, { name, emoji, target, saved, deadline, colour });
+    } else {
+      state.goals.push({ id: uid(), name, emoji, target, saved, deadline, colour });
+    }
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+function openEditGoal(id) {
+  const g = state.goals.find(g => g.id === id);
+  if (g) openGoalModal(g);
+}
+
+// ─── CONTRIBUTE ───────────────────────────────────────────────────────────────
+function openContribute(id) {
+  const g = state.goals.find(g => g.id === id);
+  if (!g) return;
+  openModal(`Add to "${g.name}"`, `
+    <div class="field">
+      <label>Amount to Add (£)</label>
+      <input type="number" id="f_contrib" min="0" step="0.01" placeholder="0.00">
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--muted);margin-top:0.5rem;">
+      Current: ${fmt(g.saved)} / ${fmt(g.target)}
+    </div>
+  `, () => {
+    const amt = parseFloat(document.getElementById('f_contrib').value) || 0;
+    if (!amt) return;
+    g.saved = Math.min(g.saved + amt, g.target * 2);
+    saveData(); renderAll(); closeModal();
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
